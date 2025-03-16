@@ -1,15 +1,15 @@
 import { ref, watch } from 'vue';
 
-export function useLocalStorage(key, defaultValue) {
+export function useLocalStorage<T>(key: string, defaultValue: T) {
   // Create a ref to store the data
-  const data = ref(getStoredValue());
+  const data = ref<T>(getStoredValue());
   
   // Function to retrieve the value from localStorage
-  function getStoredValue() {
+  function getStoredValue(): T {
     try {
       const value = localStorage.getItem(key);
       // If the key exists in localStorage, parse and return it
-      if (value) return JSON.parse(value);
+      if (value) return JSON.parse(value) as T;
       
       // Otherwise store and return the default value
       localStorage.setItem(key, JSON.stringify(defaultValue));
