@@ -1,30 +1,19 @@
-<script setup>
+<script setup lang="ts">
 import { ref, toRefs, watchEffect } from 'vue'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../supabase'
 
-const props = defineProps({
-  path: String,
-  size: {
-    type: Number,
-    default: 10
-  }
-})
+const prop = defineProps(['path', 'size'])
+const { path, size } = toRefs(prop)
 
-const { path, size } = toRefs(props)
 const emit = defineEmits(['upload', 'update:path'])
-
 const uploading = ref(false)
 const src = ref('')
 const files = ref()
 
 const downloadImage = async () => {
   try {
-    const { data, error } = await supabase.storage
-      .from('avatars')
-      .download(path.value)
-    
+    const { data, error } = await supabase.storage.from('avatars').download(path.value)
     if (error) throw error
-    
     src.value = URL.createObjectURL(data)
   } catch (error) {
     console.error('Error downloading image: ', error.message)
@@ -33,25 +22,20 @@ const downloadImage = async () => {
 
 const uploadAvatar = async (evt) => {
   files.value = evt.target.files
-  
   try {
     uploading.value = true
-    
     if (!files.value || files.value.length === 0) {
       throw new Error('You must select an image to upload.')
     }
-    
+
     const file = files.value[0]
     const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random()}.${fileExt}`
-    
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(fileName, file)
-    
+    const filePath = `${Math.random()}.${fileExt}`
+
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file)
+
     if (uploadError) throw uploadError
-    
-    emit('update:path', fileName)
+    emit('update:path', filePath)
     emit('upload')
   } catch (error) {
     alert(error.message)
@@ -66,24 +50,19 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="avatar-container">
-    <div v-if="src" class="avatar-preview">
-      <img
-        :src="src"
-        alt="Avatar"
-        class="avatar"
-        :style="{ height: size + 'em', width: size + 'em' }"
-      />
-    </div>
-    <div 
-      v-else 
-      class="avatar no-image" 
+  <div>
+    <img
+      v-if="src"
+      :src="src"
+      alt="Avatar"
+      class="avatar image"
       :style="{ height: size + 'em', width: size + 'em' }"
     />
-    
-    <div :style="{ width: size + 'em' }" class="mt-2">
-      <label class="button primary" for="single">
-        {{ uploading ? 'Uploading...' : 'Upload' }}
+    <div v-else class="avatar no-image" :style="{ height: size + 'em', width: size + 'em' }" />
+
+    <div :style="{ width: size + 'em' }">
+      <label class="button primary block" for="single">
+        {{ uploading ? 'Uploading ...' : 'Upload' }}
       </label>
       <input
         style="visibility: hidden; position: absolute"
@@ -96,22 +75,3 @@ watchEffect(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.avatar-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.avatar-preview {
-  border-radius: 50%;
-  overflow: hidden;
-  border: 3px solid var(--primary-color);
-}
-
-.mt-2 {
-  margin-top: 0.5rem;
-}
-</style>
