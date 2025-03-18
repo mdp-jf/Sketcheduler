@@ -4,7 +4,7 @@
         <div class="auth-header">
           <div class="logo">A</div>
           <h2>Sign in to your account</h2>
-          <p>Or <a href="#">create a new account</a></p>
+          <p>Or <RouterLink to="/">create a new account</RouterLink></p>
         </div>
         
         <form @submit.prevent="handleSignin">
@@ -48,18 +48,17 @@
             <label for="remember-me">Remember me</label>
           </div>
   
-          <button type="submit" class="btn-primary sign-in-button" @click="handleSignin">
+          <button type="submit" class="btn-primary sign-in-button">
             Sign in
           </button>
         </form>
-        
-        
       </div>
     </div>
   </template>
   
   <script setup lang="ts">
   import { ref } from "vue";
+  import { RouterLink } from "vue-router";
   import router from "../router/index";
   import { supabase } from "../lib/supabase";
   
@@ -67,18 +66,28 @@
   const password = ref("");
   
   const handleSignin = async () => {
-    try {
-      // Use the Supabase provided method to handle the signin
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.value,
-        password: password.value,
-      });
-      if (error) throw error;
+  try {
+    console.log("Attempting sign in with:", email.value);
+    
+    // Use the Supabase provided method to handle the signin
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.value,
+      password: password.value,
+    });
+    
+    console.log("Sign in response:", data, error);
+    
+    if (error) throw error;
+    
+    // Add a delay before navigation to ensure the auth state is updated
+    setTimeout(() => {
       router.push("/home");
-    } catch (error: any) {
-      alert(error.error_description || error.message);
-    }
-  };
+    }, 100);
+  } catch (error: any) {
+    console.error("Sign in error:", error);
+    alert(error.error_description || error.message);
+  }
+};
   </script>
   
   <style scoped>
