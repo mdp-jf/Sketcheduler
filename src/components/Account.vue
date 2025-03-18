@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { onMounted, ref, toRefs } from 'vue'
 import Avatar from './Avatar.vue'
 
-const props = defineProps(['session'])
+const props = defineProps<{ session: any }>()
 const { session } = toRefs(props)
 
 const loading = ref(true)
@@ -18,6 +18,7 @@ onMounted(() => {
 async function getProfile() {
   try {
     loading.value = true
+    if (!session.value) throw new Error('No session')
     const { user } = session.value
 
     const { data, error, status } = await supabase
@@ -33,7 +34,7 @@ async function getProfile() {
       website.value = data.website
       avatar_url.value = data.avatar_url
     }
-  } catch (error) {
+  } catch (error: any) {
     alert(error.message)
   } finally {
     loading.value = false
@@ -56,7 +57,7 @@ async function updateProfile() {
     const { error } = await supabase.from('profiles').upsert(updates)
 
     if (error) throw error
-  } catch (error) {
+  } catch (error: any) {
     alert(error.message)
   } finally {
     loading.value = false
@@ -68,7 +69,7 @@ async function signOut() {
     loading.value = true
     const { error } = await supabase.auth.signOut()
     if (error) throw error
-  } catch (error) {
+  } catch (error: any) {
     alert(error.message)
   } finally {
     loading.value = false
@@ -78,7 +79,7 @@ async function signOut() {
 
 <template>
   <form class="form-widget" @submit.prevent="updateProfile">
-    <Avatar v-model:path="avatar_url" @upload="updateProfile" size="10" />
+    <Avatar v-model:path="avatar_url" @upload="updateProfile" :size="10" />
     <div>
       <label for="email">Email</label>
       <input id="email" type="text" :value="session.user.email" disabled />
