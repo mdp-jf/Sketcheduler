@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { supabase } from '../supabase'
+import { supabase } from '../lib/supabase'
 import { onMounted, ref, toRefs } from 'vue'
 import Avatar from './Avatar.vue'
 
