@@ -89,7 +89,7 @@
   
   <script setup lang="ts">
   import { ref, reactive } from 'vue'
-  import { supabase } from '../lib/supabase'
+  import { useExercisesStore } from '../stores/exercises'
   
   // Define props and emits
   const props = defineProps<{
@@ -97,6 +97,9 @@
   }>()
   
   const emit = defineEmits(['cancel', 'exercise-added'])
+  
+  // Get store
+  const exercisesStore = useExercisesStore()
   
   // Form state
   const exerciseData = reactive({
@@ -117,31 +120,24 @@
       message.value = ''
       isError.value = false
       
-      // Insert new exercise into Supabase
-      const { data, error } = await supabase
-        .from('exercises')
-        .insert([
-          {
-            lesson_id: props.lessonId,
-            title: exerciseData.title,
-            description: exerciseData.description,
-            order_number: exerciseData.order_number,
-            is_warmup_eligible: exerciseData.is_warmup_eligible
-          }
-        ])
-        .select()
+      // Use the store to add an exercise
+      const result = await exercisesStore.addExercise({
+        lesson_id: props.lessonId,
+        title: exerciseData.title,
+        description: exerciseData.description,
+        order_number: exerciseData.order_number,
+        is_warmup_eligible: exerciseData.is_warmup_eligible
+      })
       
-      if (error) {
-        throw error
+      if (!result.success) {
+        throw new Error(result.error)
       }
       
       // Show success message
       message.value = 'Exercise added successfully!'
       
       // Emit event with the new exercise data
-      if (data && data.length > 0) {
-        emit('exercise-added', data[0])
-      }
+      emit('exercise-added', result.data)
       
       // Reset form
       exerciseData.title = ''
