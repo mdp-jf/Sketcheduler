@@ -71,10 +71,13 @@
   
   <script setup lang="ts">
   import { ref, reactive } from 'vue'
-  import { supabase } from '../lib/supabase'
+  import { useLessonsStore } from '../stores/lessons'
   
   // Define props and emits
   const emit = defineEmits(['cancel', 'lesson-added'])
+  
+  // Get lessons store
+  const lessonsStore = useLessonsStore()
   
   // Form state
   const lessonData = reactive({
@@ -94,29 +97,22 @@
       message.value = ''
       isError.value = false
       
-      // Insert new lesson into Supabase
-      const { data, error } = await supabase
-        .from('lessons')
-        .insert([
-          {
-            title: lessonData.title,
-            description: lessonData.description,
-            order_number: lessonData.order_number,
-          }
-        ])
-        .select()
+      // Use the store to add a lesson
+      const result = await lessonsStore.addLesson({
+        title: lessonData.title,
+        description: lessonData.description,
+        order_number: lessonData.order_number,
+      })
       
-      if (error) {
-        throw error
+      if (!result.success) {
+        throw new Error(result.error)
       }
       
       // Show success message
       message.value = 'Lesson added successfully!'
       
       // Emit event with the new lesson data
-      if (data && data.length > 0) {
-        emit('lesson-added', data[0])
-      }
+      emit('lesson-added', result.data)
       
       // Reset form
       lessonData.title = ''
