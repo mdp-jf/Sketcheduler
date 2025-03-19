@@ -1,26 +1,22 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { supabase } from './lib/supabase'
+import { onMounted } from 'vue'
+import { useAuthStore } from './stores/auth'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const session = ref()
+const authStore = useAuthStore()
 
-onMounted(() => {
-  supabase.auth.getSession().then(({ data }) => {
-    session.value = data.session
-    console.log("Session on mount:", session.value)
-    
-    // If user is logged in but on sign-in page, redirect to home
-    if (session.value && (window.location.pathname === '/sign-in' || window.location.pathname === '/')) {
-      router.push('/home')
-    }
-  })
+onMounted(async () => {
+  console.log("App mounted, initializing auth store")
+  await authStore.initialize()
   
-  supabase.auth.onAuthStateChange((_, _session) => {
-    session.value = _session
-    console.log("Auth state changed:", session.value)
-  })
+  console.log("Auth initialized, user is:", authStore.user?.email)
+  
+  // If user is logged in but on sign-in page, redirect to home
+  if (authStore.isAuthenticated() && 
+      (window.location.pathname === '/sign-in' || window.location.pathname === '/')) {
+    router.push('/home')
+  }
 })
 </script>
 

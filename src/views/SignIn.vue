@@ -58,36 +58,36 @@
   
   <script setup lang="ts">
   import { ref } from "vue";
-  import { RouterLink } from "vue-router";
-  import router from "../router/index";
-  import { supabase } from "../lib/supabase";
+  import { RouterLink, useRouter } from "vue-router";
+  import { useAuthStore } from "../stores/auth";
+  
+  const router = useRouter();
+  const authStore = useAuthStore();
   
   const email = ref("");
   const password = ref("");
   
   const handleSignin = async () => {
-  try {
-    console.log("Attempting sign in with:", email.value);
-    
-    // Use the Supabase provided method to handle the signin
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.value,
-      password: password.value,
-    });
-    
-    console.log("Sign in response:", data, error);
-    
-    if (error) throw error;
-    
-    // Add a delay before navigation to ensure the auth state is updated
-    setTimeout(() => {
-      router.push("/home");
-    }, 100);
-  } catch (error: any) {
-    console.error("Sign in error:", error);
-    alert(error.error_description || error.message);
-  }
-};
+    try {
+      console.log("Sign in component: Attempting sign in with:", email.value);
+      
+      const result = await authStore.signIn(email.value, password.value);
+      
+      console.log("Sign in component: result:", result);
+      
+      if (result.success) {
+        // Add a short delay to ensure auth state is updated
+        setTimeout(() => {
+          router.push("/home");
+        }, 100);
+      } else {
+        alert(result.error);
+      }
+    } catch (error: any) {
+      console.error("Sign in component error:", error);
+      alert(error.message);
+    }
+  };
   </script>
   
   <style scoped>

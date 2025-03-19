@@ -1,7 +1,6 @@
-// stores/auth.ts
 import { defineStore } from 'pinia'
-import { supabase } from '../lib/supabase'
 import { ref } from 'vue'
+import { supabase } from '../lib/supabase'
 import type { User, Session } from '@supabase/supabase-js'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -14,15 +13,18 @@ export const useAuthStore = defineStore('auth', () => {
     session.value = data.session
     user.value = data.session?.user || null
     
+    // Set up auth state change listener
     supabase.auth.onAuthStateChange((_, _session) => {
       session.value = _session
       user.value = _session?.user || null
+      console.log("Auth state changed in store:", _session?.user?.email)
     })
   }
   
   async function signIn(email: string, password: string) {
     loading.value = true
     try {
+      console.log("Attempting sign in with:", email)
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -32,27 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
       
       return { success: true, data }
     } catch (error: any) {
-      return { success: false, error: error.message }
-    } finally {
-      loading.value = false
-    }
-  }
-  
-  async function signUp(email: string, password: string) {
-    loading.value = true
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: "http://localhost:5174/home"
-        }
-      })
-      
-      if (error) throw error
-      
-      return { success: true, data }
-    } catch (error: any) {
+      console.error("Sign in error:", error)
       return { success: false, error: error.message }
     } finally {
       loading.value = false
@@ -64,9 +46,6 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
-      
-      user.value = null
-      session.value = null
       
       return { success: true }
     } catch (error: any) {
@@ -81,8 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
     session,
     loading,
     initialize,
-    signIn,
-    signUp, 
+    signIn, 
     signOut,
     isAuthenticated: () => !!user.value
   }

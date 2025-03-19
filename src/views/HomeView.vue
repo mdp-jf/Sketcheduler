@@ -30,16 +30,21 @@
   
   <script setup lang="ts">
   import { useRouter } from 'vue-router'
-  import { supabase } from '../lib/supabase'
+  import { useAuthStore } from '../stores/auth'
   
   const router = useRouter()
+  const authStore = useAuthStore()
   
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut()
-      router.push('/sign-in')
+      const result = await authStore.signOut()
+      if (result.success) {
+        router.push('/sign-in')
+      } else {
+        console.error('Error signing out:', result.error)
+      }
     } catch (error) {
-      console.error('Error signing out:', error)
+      console.error('Exception signing out:', error)
     }
   }
   </script>
