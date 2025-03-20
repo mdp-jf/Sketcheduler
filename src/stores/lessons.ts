@@ -1,9 +1,9 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
-import { lessonServices } from '../lib/lessonsServices';
-import { supabase } from '../lib/supabase';
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import { lessonServices } from "../lib/lessonsServices";
+import { supabase } from "../lib/supabase";
 
-export const useLessonsStore = defineStore('lessons', () => {
+export const useLessonsStore = defineStore("lessons", () => {
   const lessons = ref([]);
   const currentLesson = ref(null);
   const loading = ref(false);
@@ -11,13 +11,13 @@ export const useLessonsStore = defineStore('lessons', () => {
   async function fetchLessons() {
     loading.value = true;
     try {
-      console.log('Fetching lessons...');
+      console.log("Fetching lessons...");
       const data = await lessonServices.getLessons();
-      console.log('Lessons fetched:', data);
+      console.log("Lessons fetched:", data);
       lessons.value = data;
       return { success: true, data };
     } catch (error) {
-      console.error('Error fetching lessons:', error);
+      console.error("Error fetching lessons:", error);
       return { success: false, error };
     } finally {
       loading.value = false;
@@ -29,11 +29,11 @@ export const useLessonsStore = defineStore('lessons', () => {
     try {
       console.log(`Fetching lesson with ID: ${id}`);
       const data = await lessonServices.getLessonById(id);
-      console.log('Lesson fetched:', data);
+      console.log("Lesson fetched:", data);
       currentLesson.value = data;
       return { success: true, data };
     } catch (error) {
-      console.error('Error fetching lesson:', error);
+      console.error("Error fetching lesson:", error);
       return { success: false, error };
     } finally {
       loading.value = false;
@@ -43,14 +43,17 @@ export const useLessonsStore = defineStore('lessons', () => {
   async function addLesson(lessonData) {
     loading.value = true;
     try {
-      console.log('Adding new lesson:', lessonData);
-      const { data, error } = await supabase.from('lessons').insert([lessonData]).select();
+      console.log("Adding new lesson:", lessonData);
+      const { data, error } = await supabase
+        .from("lessons")
+        .insert([lessonData])
+        .select();
 
       if (error) throw error;
 
       // Add the new lesson to the store
       if (data && data.length > 0) {
-        console.log('Lesson added:', data[0]);
+        console.log("Lesson added:", data[0]);
         lessons.value.push(data[0]);
         // Sort by order number
         lessons.value.sort((a, b) => a.order_number - b.order_number);
@@ -58,7 +61,7 @@ export const useLessonsStore = defineStore('lessons', () => {
 
       return { success: true, data: data?.[0] };
     } catch (error) {
-      console.error('Error adding lesson:', error);
+      console.error("Error adding lesson:", error);
       return { success: false, error };
     } finally {
       loading.value = false;

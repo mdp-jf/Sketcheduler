@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
-import { challengeServices } from '../lib/ChallengeServices';
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import { challengeServices } from "../lib/ChallengeServices";
 
-export const useChallengesStore = defineStore('challenges', () => {
+export const useChallengesStore = defineStore("challenges", () => {
   const challenges = ref([]);
   const currentChallenge = ref(null);
   const currentProgress = ref(null);
@@ -11,13 +11,13 @@ export const useChallengesStore = defineStore('challenges', () => {
   async function fetchChallenges() {
     loading.value = true;
     try {
-      console.log('Fetching challenges...');
+      console.log("Fetching challenges...");
       const data = await challengeServices.getChallenges();
-      console.log('Challenges fetched:', data);
+      console.log("Challenges fetched:", data);
       challenges.value = data;
       return { success: true, data };
     } catch (error) {
-      console.error('Error fetching challenges:', error);
+      console.error("Error fetching challenges:", error);
       return { success: false, error };
     } finally {
       loading.value = false;
@@ -29,11 +29,11 @@ export const useChallengesStore = defineStore('challenges', () => {
     try {
       console.log(`Fetching challenge with ID: ${id}`);
       const data = await challengeServices.getChallengeById(id);
-      console.log('Challenge fetched:', data);
+      console.log("Challenge fetched:", data);
       currentChallenge.value = data;
       return { success: true, data };
     } catch (error) {
-      console.error('Error fetching challenge:', error);
+      console.error("Error fetching challenge:", error);
       return { success: false, error };
     } finally {
       loading.value = false;
@@ -45,11 +45,11 @@ export const useChallengesStore = defineStore('challenges', () => {
     try {
       console.log(`Fetching progress for challenge ID: ${challengeId}`);
       const data = await challengeServices.getChallengeProgress(challengeId);
-      console.log('Challenge progress fetched:', data);
+      console.log("Challenge progress fetched:", data);
       currentProgress.value = data;
       return { success: true, data };
     } catch (error) {
-      console.error('Error fetching challenge progress:', error);
+      console.error("Error fetching challenge progress:", error);
       return { success: false, error };
     } finally {
       loading.value = false;
@@ -64,7 +64,7 @@ export const useChallengesStore = defineStore('challenges', () => {
         challengeId,
         count,
         imageUrl,
-        notes
+        notes,
       );
 
       // Update current progress
@@ -72,7 +72,7 @@ export const useChallengesStore = defineStore('challenges', () => {
 
       return { success: true, data: result };
     } catch (error) {
-      console.error('Error submitting challenge progress:', error);
+      console.error("Error submitting challenge progress:", error);
       return { success: false, error };
     } finally {
       loading.value = false;

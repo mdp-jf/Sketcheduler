@@ -1,12 +1,12 @@
-import { supabase } from './supabase';
+import { supabase } from "./supabase";
 
 // Free Drawing Services
 export const drawingServices = {
   async getPrompts() {
     const { data, error } = await supabase
-      .from('drawing_prompts')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("drawing_prompts")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return data;
@@ -14,9 +14,9 @@ export const drawingServices = {
 
   async createPrompt(promptText: string, category?: string) {
     const user = (await supabase.auth.getUser()).data.user;
-    if (!user) throw new Error('User not authenticated');
+    if (!user) throw new Error("User not authenticated");
 
-    const { data, error } = await supabase.from('drawing_prompts').insert([
+    const { data, error } = await supabase.from("drawing_prompts").insert([
       {
         user_id: user.id,
         prompt_text: promptText,
@@ -28,11 +28,16 @@ export const drawingServices = {
     return data;
   },
 
-  async submitFreeDrawing(imageUrl: string, timeSpent: number, notes: string, promptId?: number) {
+  async submitFreeDrawing(
+    imageUrl: string,
+    timeSpent: number,
+    notes: string,
+    promptId?: number,
+  ) {
     const user = (await supabase.auth.getUser()).data.user;
-    if (!user) throw new Error('User not authenticated');
+    if (!user) throw new Error("User not authenticated");
 
-    const { data, error } = await supabase.from('free_drawings').insert([
+    const { data, error } = await supabase.from("free_drawings").insert([
       {
         user_id: user.id,
         image_url: imageUrl,
@@ -48,13 +53,13 @@ export const drawingServices = {
 
   async getUserDrawings() {
     const user = (await supabase.auth.getUser()).data.user;
-    if (!user) throw new Error('User not authenticated');
+    if (!user) throw new Error("User not authenticated");
 
     const { data, error } = await supabase
-      .from('free_drawings')
-      .select('*, drawing_prompts(*)')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .from("free_drawings")
+      .select("*, drawing_prompts(*)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return data;

@@ -1,9 +1,9 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
-import { supabase } from '../lib/supabase';
-import type { User, Session } from '@supabase/supabase-js';
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import { supabase } from "../lib/supabase";
+import type { User, Session } from "@supabase/supabase-js";
 
-export const useAuthStore = defineStore('auth', () => {
+export const useAuthStore = defineStore("auth", () => {
   const user = ref<User | null>(null);
   const session = ref<Session | null>(null);
   const loading = ref(false);
@@ -17,14 +17,14 @@ export const useAuthStore = defineStore('auth', () => {
     supabase.auth.onAuthStateChange((_, _session) => {
       session.value = _session;
       user.value = _session?.user || null;
-      console.log('Auth state changed in store:', _session?.user?.email);
+      console.log("Auth state changed in store:", _session?.user?.email);
     });
   }
 
   async function signIn(email: string, password: string) {
     loading.value = true;
     try {
-      console.log('Attempting sign in with:', email);
+      console.log("Attempting sign in with:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       return { success: true, data };
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      console.error("Sign in error:", error);
       return { success: false, error: error.message };
     } finally {
       loading.value = false;
