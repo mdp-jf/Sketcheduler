@@ -1,5 +1,10 @@
 <template>
   <div class="dashboard">
+    <!-- User Stats Summary -->
+    <div class="mb-6">
+      <ProfileStatsCard v-if="userStats" :user-stats="userStats" />
+    </div>
+
     <!-- Header and Tabs -->
     <div class="tabs flex border-b mb-6">
       <button
@@ -47,11 +52,13 @@ import { useRouter } from "vue-router";
 import { useLessonsStore } from "../stores/lessons";
 import { useChallengesStore } from "../stores/challenges";
 import { useDrawingsStore } from "../stores/drawings";
+import { useUserStore } from "../stores/user";
 import { useLoading } from "../composables/useLoading";
 import { useError } from "../composables/useError";
 import LessonsTab from "../components/tabs/LessonsTab.vue";
 import ChallengesTab from "../components/tabs/ChallengesTab.vue";
 import DrawingsTab from "../components/tabs/DrawingsTab.vue";
+import ProfileStatsCard from "../components/profile/StatsCard.vue";
 import BaseLoading from "../components/BaseLoading.vue";
 import BaseError from "../components/BaseError.vue";
 
@@ -67,6 +74,7 @@ const router = useRouter();
 const lessonsStore = useLessonsStore();
 const challengesStore = useChallengesStore();
 const drawingsStore = useDrawingsStore();
+const userStore = useUserStore();
 
 // Composables
 const { isLoading } = useLoading();
@@ -91,6 +99,7 @@ const tabs = [
 
 // State
 const activeTab = ref("lessons");
+const userStats = computed(() => userStore.userStats);
 
 // Computed properties
 const currentTabComponent = computed(() => {
@@ -110,13 +119,13 @@ const loadDashboardData = async () => {
     clearError();
 
     // Load all data in parallel for better performance
-    const [lessonsResult, challengesResult, drawingsResult] = await Promise.all(
-      [
+    const [lessonsResult, challengesResult, drawingsResult, statsResult] =
+      await Promise.all([
         lessonsStore.fetchLessons(),
         challengesStore.fetchChallenges(),
         drawingsStore.fetchUserDrawings(),
-      ],
-    );
+        userStore.fetchUserStats(),
+      ]);
 
     // Check for errors in any of the API calls
     if (!lessonsResult.success) {
@@ -132,6 +141,11 @@ const loadDashboardData = async () => {
     if (!drawingsResult.success) {
       setError(String(drawingsResult.error) || "Failed to load drawings");
       return;
+    }
+
+    if (!statsResult.success) {
+      console.error("Failed to load user stats:", statsResult.error);
+      // Continue even if stats fail - non-critical
     }
   } catch (err: any) {
     setError(err.message || "An unexpected error occurred");
