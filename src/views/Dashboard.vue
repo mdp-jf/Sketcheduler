@@ -1,8 +1,16 @@
 <template>
   <div class="dashboard">
-    <!-- User Stats Summary -->
-    <div class="mb-6">
-      <ProfileStatsCard v-if="userStats" :user-stats="userStats" />
+    <!-- User Stats and Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <!-- User stats -->
+      <div class="lg:col-span-2">
+        <ProfileStatsCard v-if="userStats" :user-stats="userStats" />
+      </div>
+
+      <!-- Recent activity -->
+      <div class="lg:col-span-1">
+        <ProfileActivityCard :activities="recentActivity" />
+      </div>
     </div>
 
     <!-- Header and Tabs -->
@@ -59,6 +67,7 @@ import LessonsTab from "../components/tabs/LessonsTab.vue";
 import ChallengesTab from "../components/tabs/ChallengesTab.vue";
 import DrawingsTab from "../components/tabs/DrawingsTab.vue";
 import ProfileStatsCard from "../components/profile/StatsCard.vue";
+import ProfileActivityCard from "../components/profile/ActivityCard.vue";
 import BaseLoading from "../components/BaseLoading.vue";
 import BaseError from "../components/BaseError.vue";
 
@@ -100,6 +109,7 @@ const tabs = [
 // State
 const activeTab = ref("lessons");
 const userStats = computed(() => userStore.userStats);
+const recentActivity = computed(() => userStore.userActivity);
 
 // Computed properties
 const currentTabComponent = computed(() => {
@@ -119,13 +129,19 @@ const loadDashboardData = async () => {
     clearError();
 
     // Load all data in parallel for better performance
-    const [lessonsResult, challengesResult, drawingsResult, statsResult] =
-      await Promise.all([
-        lessonsStore.fetchLessons(),
-        challengesStore.fetchChallenges(),
-        drawingsStore.fetchUserDrawings(),
-        userStore.fetchUserStats(),
-      ]);
+    const [
+      lessonsResult,
+      challengesResult,
+      drawingsResult,
+      statsResult,
+      activityResult,
+    ] = await Promise.all([
+      lessonsStore.fetchLessons(),
+      challengesStore.fetchChallenges(),
+      drawingsStore.fetchUserDrawings(),
+      userStore.fetchUserStats(),
+      userStore.fetchUserActivity(),
+    ]);
 
     // Check for errors in any of the API calls
     if (!lessonsResult.success) {
@@ -146,6 +162,11 @@ const loadDashboardData = async () => {
     if (!statsResult.success) {
       console.error("Failed to load user stats:", statsResult.error);
       // Continue even if stats fail - non-critical
+    }
+
+    if (!activityResult.success) {
+      console.error("Failed to load user activity:", activityResult.error);
+      // Continue even if activity fails - non-critical
     }
   } catch (err: any) {
     setError(err.message || "An unexpected error occurred");
