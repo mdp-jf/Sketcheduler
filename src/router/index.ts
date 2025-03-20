@@ -10,7 +10,7 @@ import { useMaintenanceMode } from "../composables/useMaintenanceMode";
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    redirect: "/home",
+    redirect: "/sign-in",
   },
   {
     path: "/home",
@@ -78,6 +78,13 @@ router.beforeEach(async (to, from, next) => {
       return;
     }
 
+    // Redirect authenticated users away from auth pages
+    if ((to.name === "signin" || to.name === "signup") && currentUser) {
+      next("/home");
+      return;
+    }
+
+    // Handle protected routes
     if (requiresAuth && !currentUser) {
       next("/sign-in");
     } else {
