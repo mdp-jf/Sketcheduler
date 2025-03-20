@@ -16,8 +16,8 @@
           >
             Dashboard
           </router-link>
-          <router-link to="/account" class="text-gray-600 hover:text-blue-500">
-            Account
+          <router-link to="/profile" class="text-gray-600 hover:text-blue-500">
+            Profile
           </router-link>
           <button
             class="text-gray-600 hover:text-red-500"

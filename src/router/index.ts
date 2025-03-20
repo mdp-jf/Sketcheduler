@@ -5,8 +5,13 @@ import {
 } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import { supabase } from "../lib/supabase";
+import { useMaintenanceMode } from "../composables/useMaintenanceMode";
 
 const routes: Array<RouteRecordRaw> = [
+  {
+    path: "/",
+    redirect: "/home",
+  },
   {
     path: "/home",
     name: "home",
@@ -19,11 +24,22 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../views/SignIn.vue"),
   },
   {
-    path: "/",
+    path: "/sign-up",
     name: "signup",
     component: () => import("../views/SignUp.vue"),
   },
-  // New routes for the drawing app
+  {
+    path: "/account",
+    name: "account",
+    component: () => import("../views/AccountSettings.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/profile",
+    name: "profile",
+    component: () => import("../views/UserProfile.vue"),
+    meta: { requiresAuth: true },
+  },
   {
     path: "/dashboard",
     name: "dashboard",
@@ -37,6 +53,11 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
     meta: { requiresAuth: true },
   },
+  {
+    path: "/maintenance",
+    name: "maintenance",
+    component: () => import("../views/MaintenanceView.vue"),
+  },
 ];
 
 const router = createRouter({
@@ -46,10 +67,17 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   try {
+    const { isInMaintenance } = useMaintenanceMode();
     const { data } = await supabase.auth.getSession();
     const currentUser = data.session?.user || null;
-
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+
+    // Prevent access to signup page when in maintenance mode
+    if (to.name === "signup" && isInMaintenance.value) {
+      next("/maintenance");
+      return;
+    }
+
     if (requiresAuth && !currentUser) {
       next("/sign-in");
     } else {
