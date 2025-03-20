@@ -1,5 +1,13 @@
 <template>
   <div class="dashboard">
+    <!-- Welcome Message -->
+    <WelcomeMessage
+      v-if="userStats"
+      :user-stats="userStats"
+      :user-name="userName"
+      @action="handleNavigation"
+    />
+
     <!-- User Stats and Recent Activity -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
       <!-- User stats -->
@@ -9,7 +17,10 @@
 
       <!-- Recent activity -->
       <div class="lg:col-span-1">
-        <ProfileActivityCard :activities="recentActivity" />
+        <ProfileActivityCard
+          v-if="recentActivity && recentActivity.length > 0"
+          :activities="recentActivity"
+        />
       </div>
     </div>
 
@@ -68,6 +79,7 @@ import ChallengesTab from "../components/tabs/ChallengesTab.vue";
 import DrawingsTab from "../components/tabs/DrawingsTab.vue";
 import ProfileStatsCard from "../components/profile/StatsCard.vue";
 import ProfileActivityCard from "../components/profile/ActivityCard.vue";
+import WelcomeMessage from "../components//WelcomeMessage.vue";
 import BaseLoading from "../components/BaseLoading.vue";
 import BaseError from "../components/BaseError.vue";
 
@@ -110,6 +122,9 @@ const tabs = [
 const activeTab = ref("lessons");
 const userStats = computed(() => userStore.userStats);
 const recentActivity = computed(() => userStore.userActivity);
+const userName = computed(
+  () => userStore.userProfile?.name || userStore.userProfile?.username || null,
+);
 
 // Computed properties
 const currentTabComponent = computed(() => {
