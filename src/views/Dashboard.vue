@@ -1,13 +1,19 @@
 <template>
   <div class="dashboard">
     <!-- Widget Layout based on user customization -->
-    <template v-for="(widget) in sortedVisibleWidgets" :key="widget.id">
+    <template v-for="widget in sortedVisibleWidgets" :key="widget.id">
       <!-- Welcome Message Widget -->
       <WelcomeMessage
         v-if="widget.id === 'welcome' && userStats"
         :user-stats="userStats"
         :user-name="userName"
         @action="handleNavigation"
+      />
+
+      <!-- Quick Access Buttons Widget -->
+      <QuickAccessButtons
+        v-if="widget.id === 'quickAccess'"
+        @session-start="handleSessionStart"
       />
 
       <!-- User Stats and Recent Activity Widgets -->
@@ -99,6 +105,7 @@ import DrawingsTab from "../components/tabs/DrawingsTab.vue";
 import ProfileStatsCard from "../components/profile/StatsCard.vue";
 import ProfileActivityCard from "../components/profile/ActivityCard.vue";
 import WelcomeMessage from "../components/dashboard/WelcomeMessage.vue";
+import QuickAccessButtons from "../components/dashboard/QuickAccessButtons.vue";
 import DashboardSettings, {
   type WidgetSettings,
 } from "../components/dashboard/DashboardSettings.vue";
@@ -153,9 +160,10 @@ const widgetSettings = useLocalStorage<WidgetSettings>(
   "dashboard-widget-settings",
   {
     welcome: { visible: true, order: 1 },
-    stats: { visible: true, order: 2 },
-    activity: { visible: true, order: 3 },
-    tabContent: { visible: true, order: 4 },
+    quickAccess: { visible: true, order: 2 },
+    stats: { visible: true, order: 3 },
+    activity: { visible: true, order: 4 },
+    tabContent: { visible: true, order: 5 },
   },
 );
 
@@ -168,6 +176,7 @@ const updateWidgetSettings = (newSettings: WidgetSettings) => {
 const sortedVisibleWidgets = computed(() => {
   const widgetDefinitions = [
     { id: "welcome", name: "Welcome Message" },
+    { id: "quickAccess", name: "Quick Access" },
     { id: "stats", name: "Progress Stats" },
     { id: "activity", name: "Recent Activity" },
     { id: "tabContent", name: "Tab Content" },
@@ -192,6 +201,13 @@ const currentTabComponent = computed(() => {
 // Event handlers
 const handleNavigation = (path: string) => {
   router.push(path);
+};
+
+// Handle session start from quick access buttons
+const handleSessionStart = (type: string, id?: string) => {
+  console.log(`Starting ${type} session`, id);
+  // You could add analytics tracking here
+  // or any other side effects when a session starts
 };
 
 // Fetch data
