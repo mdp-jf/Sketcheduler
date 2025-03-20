@@ -1,76 +1,29 @@
-// eslint.config.js
 import eslint from '@eslint/js';
-import vue from 'eslint-plugin-vue';
-import * as tseslint from 'typescript-eslint';
-import prettierPlugin from 'eslint-plugin-prettier';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import eslintPluginVue from 'eslint-plugin-vue';
 import globals from 'globals';
+import typescriptEslint from 'typescript-eslint';
 
-export default [
-  // Ignore patterns
+export default typescriptEslint.config(
+  { ignores: ['*.d.ts', '**/coverage', '**/dist'] },
   {
-    ignores: ['node_modules/**', 'dist/**', '*.min.js', '*.d.ts'],
-  },
-
-  // Global settings for all files
-  {
+    extends: [
+      eslint.configs.recommended,
+      ...typescriptEslint.configs.recommended,
+      ...eslintPluginVue.configs['flat/recommended'],
+    ],
+    files: ['**/*.{ts,vue}'],
     languageOptions: {
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
-    },
-  },
-
-  // Base ESLint config
-  eslint.configs.recommended,
-
-  // TypeScript flat configs
-  ...tseslint.configs.recommended,
-
-  // Vue config - Updated parser configuration
-  {
-    files: ['**/*.vue'],
-    plugins: {
-      vue,
-    },
-    languageOptions: {
-      parser: vue.parser,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: globals.browser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        parser: {
-          // Use TS parser for <script> tags
-          ts: tseslint.parser,
-          // Use TS parser for <script lang="ts"> blocks
-          '<script lang="ts">': tseslint.parser,
-        },
-        extraFileExtensions: ['.vue'],
+        parser: typescriptEslint.parser,
       },
     },
     rules: {
-      'vue/no-parsing-error': 'off',
-      'vue/multi-word-component-names': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off'
     },
   },
-
-  // Custom rules for all files
-  {
-    files: ['**/*.{js,ts,vue}'],
-    rules: {
-      'no-console': 'off', // Allow console for development
-      'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    },
-  },
-
-  // Prettier config
-  {
-    files: ['**/*.{js,ts,vue}'],
-    plugins: {
-      prettier: prettierPlugin,
-    },
-    rules: {
-      'prettier/prettier': 'error',
-    },
-  },
-];
+  eslintConfigPrettier
+);

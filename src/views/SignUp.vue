@@ -10,10 +10,15 @@
         >
           A
         </div>
-        <h2 class="text-3xl font-extrabold text-gray-800">Create a new account</h2>
+        <h2 class="text-3xl font-extrabold text-gray-800">
+          Create a new account
+        </h2>
         <p class="mt-2 text-sm text-gray-600">
           Or
-          <RouterLink class="font-medium text-blue-600 hover:text-blue-500" to="/sign-in">
+          <RouterLink
+            class="font-medium text-blue-600 hover:text-blue-500"
+            to="/sign-in"
+          >
             sign in to your account
           </RouterLink>
         </p>
@@ -27,7 +32,9 @@
               Email address
             </label>
             <div class="mt-1 relative rounded-md shadow-sm">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div
+                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+              >
                 <svg
                   class="h-5 w-5 text-gray-400"
                   xmlns="http://www.w3.org/2000/svg"
@@ -38,13 +45,15 @@
                   <path
                     d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
                   />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  <path
+                    d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"
+                  />
                 </svg>
               </div>
               <input
                 id="email"
-                type="email"
                 v-model="email"
+                type="email"
                 required
                 class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-3"
                 placeholder="you@example.com"
@@ -53,9 +62,16 @@
           </div>
 
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700"> Password </label>
+            <label
+              for="password"
+              class="block text-sm font-medium text-gray-700"
+            >
+              Password
+            </label>
             <div class="mt-1 relative rounded-md shadow-sm">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div
+                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+              >
                 <svg
                   class="h-5 w-5 text-gray-400"
                   xmlns="http://www.w3.org/2000/svg"
@@ -72,14 +88,16 @@
               </div>
               <input
                 id="password"
-                type="password"
                 v-model="password"
+                type="password"
                 required
                 class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-3"
                 placeholder="••••••••"
               />
             </div>
-            <p class="mt-2 text-xs text-gray-500">Password must be at least 6 characters</p>
+            <p class="mt-2 text-xs text-gray-500">
+              Password must be at least 6 characters
+            </p>
           </div>
 
           <div>
@@ -98,13 +116,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { supabase } from '../lib/supabase';
-import router from '../router/index';
-import type { AuthError } from '@supabase/supabase-js';
+import { ref } from "vue";
+import { supabase } from "../lib/supabase";
+import router from "../router/index";
+import type { AuthError } from "@supabase/supabase-js";
 
-const email = ref('');
-const password = ref('');
+const email = ref("");
+const password = ref("");
 
 const handleSignup = async () => {
   try {
@@ -112,18 +130,18 @@ const handleSignup = async () => {
       email: email.value,
       password: password.value,
       options: {
-        emailRedirectTo: 'http://localhost:5174/home',
+        emailRedirectTo: "http://localhost:5174/home",
       },
     });
     if (error) throw error;
-    router.push('/sign-in');
+    router.push("/sign-in");
   } catch (error: unknown) {
     if (error instanceof Error) {
       alert(error.message);
     } else if ((error as AuthError).message) {
       alert((error as AuthError).message || (error as AuthError).message);
     } else {
-      alert('An unknown error occurred');
+      alert("An unknown error occurred");
     }
   }
 };
