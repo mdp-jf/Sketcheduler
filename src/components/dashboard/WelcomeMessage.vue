@@ -92,7 +92,7 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, computed } from "vue";
-import type { UserStats } from "../types/models";
+import type { UserStats } from "../../types/models";
 
 const props = defineProps<{
   userStats: UserStats;

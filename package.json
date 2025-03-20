@@ -15,6 +15,7 @@
     "@rushstack/eslint-patch": "^1.11.0",
     "@supabase/supabase-js": "^2.49.1",
     "@vue/eslint-config-typescript": "^14.5.0",
+    "@vueuse/core": "^13.0.0",
     "pinia": "^3.0.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"

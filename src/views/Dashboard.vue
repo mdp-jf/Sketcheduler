@@ -1,67 +1,85 @@
 <template>
   <div class="dashboard">
-    <!-- Welcome Message -->
-    <WelcomeMessage
-      v-if="userStats"
-      :user-stats="userStats"
-      :user-name="userName"
-      @action="handleNavigation"
-    />
+    <!-- Widget Layout based on user customization -->
+    <template v-for="(widget) in sortedVisibleWidgets" :key="widget.id">
+      <!-- Welcome Message Widget -->
+      <WelcomeMessage
+        v-if="widget.id === 'welcome' && userStats"
+        :user-stats="userStats"
+        :user-name="userName"
+        @action="handleNavigation"
+      />
 
-    <!-- User Stats and Recent Activity -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-      <!-- User stats -->
-      <div class="lg:col-span-2">
-        <ProfileStatsCard v-if="userStats" :user-stats="userStats" />
+      <!-- User Stats and Recent Activity Widgets -->
+      <div
+        v-if="widget.id === 'stats' || widget.id === 'activity'"
+        class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6"
+      >
+        <!-- User stats -->
+        <div v-if="widget.id === 'stats'" class="lg:col-span-2">
+          <ProfileStatsCard v-if="userStats" :user-stats="userStats" />
+        </div>
+
+        <!-- Recent activity -->
+        <div
+          v-if="widget.id === 'activity'"
+          :class="{
+            'lg:col-span-1': widgetSettings['stats']?.visible,
+            'lg:col-span-3': !widgetSettings['stats']?.visible,
+          }"
+        >
+          <ProfileActivityCard
+            v-if="recentActivity && recentActivity.length > 0"
+            :activities="recentActivity"
+          />
+        </div>
       </div>
 
-      <!-- Recent activity -->
-      <div class="lg:col-span-1">
-        <ProfileActivityCard
-          v-if="recentActivity && recentActivity.length > 0"
-          :activities="recentActivity"
+      <!-- Tab Content Widget -->
+      <div v-if="widget.id === 'tabContent'" class="mb-6">
+        <!-- Header and Tabs -->
+        <div class="tabs flex border-b mb-6">
+          <button
+            v-for="tab in tabs"
+            :key="tab.id"
+            :class="[
+              'px-4 py-2 font-medium',
+              activeTab === tab.id
+                ? `border-b-2 border-${tab.color}-500 text-${tab.color}-500`
+                : 'text-gray-600',
+            ]"
+            @click="activeTab = tab.id"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <!-- Loading state -->
+        <BaseLoading v-if="isLoading" message="Loading your content..." />
+
+        <!-- Error state -->
+        <BaseError v-else-if="error" :message="error">
+          <template #actions>
+            <button
+              class="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              @click="loadDashboardData"
+            >
+              Try Again
+            </button>
+          </template>
+        </BaseError>
+
+        <!-- Tab Content -->
+        <component
+          :is="currentTabComponent"
+          v-else
+          @navigation="handleNavigation"
         />
       </div>
-    </div>
+    </template>
 
-    <!-- Header and Tabs -->
-    <div class="tabs flex border-b mb-6">
-      <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        :class="[
-          'px-4 py-2 font-medium',
-          activeTab === tab.id
-            ? `border-b-2 border-${tab.color}-500 text-${tab.color}-500`
-            : 'text-gray-600',
-        ]"
-        @click="activeTab = tab.id"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
-
-    <!-- Loading state -->
-    <BaseLoading v-if="isLoading" message="Loading your content..." />
-
-    <!-- Error state -->
-    <BaseError v-else-if="error" :message="error">
-      <template #actions>
-        <button
-          class="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          @click="loadDashboardData"
-        >
-          Try Again
-        </button>
-      </template>
-    </BaseError>
-
-    <!-- Tab Content -->
-    <component
-      :is="currentTabComponent"
-      v-else
-      @navigation="handleNavigation"
-    />
+    <!-- Dashboard Settings Component -->
+    <DashboardSettings @update:settings="updateWidgetSettings" />
   </div>
 </template>
 
@@ -74,12 +92,16 @@ import { useDrawingsStore } from "../stores/drawings";
 import { useUserStore } from "../stores/user";
 import { useLoading } from "../composables/useLoading";
 import { useError } from "../composables/useError";
+import { useLocalStorage } from "@vueuse/core";
 import LessonsTab from "../components/tabs/LessonsTab.vue";
 import ChallengesTab from "../components/tabs/ChallengesTab.vue";
 import DrawingsTab from "../components/tabs/DrawingsTab.vue";
 import ProfileStatsCard from "../components/profile/StatsCard.vue";
 import ProfileActivityCard from "../components/profile/ActivityCard.vue";
-import WelcomeMessage from "../components//WelcomeMessage.vue";
+import WelcomeMessage from "../components/dashboard/WelcomeMessage.vue";
+import DashboardSettings, {
+  type WidgetSettings,
+} from "../components/dashboard/DashboardSettings.vue";
 import BaseLoading from "../components/BaseLoading.vue";
 import BaseError from "../components/BaseError.vue";
 
@@ -125,6 +147,41 @@ const recentActivity = computed(() => userStore.userActivity);
 const userName = computed(
   () => userStore.userProfile?.name || userStore.userProfile?.username || null,
 );
+
+// Dashboard widget settings
+const widgetSettings = useLocalStorage<WidgetSettings>(
+  "dashboard-widget-settings",
+  {
+    welcome: { visible: true, order: 1 },
+    stats: { visible: true, order: 2 },
+    activity: { visible: true, order: 3 },
+    tabContent: { visible: true, order: 4 },
+  },
+);
+
+// Update widget settings when changed in the settings component
+const updateWidgetSettings = (newSettings: WidgetSettings) => {
+  widgetSettings.value = newSettings;
+};
+
+// Compute sorted visible widgets for display order
+const sortedVisibleWidgets = computed(() => {
+  const widgetDefinitions = [
+    { id: "welcome", name: "Welcome Message" },
+    { id: "stats", name: "Progress Stats" },
+    { id: "activity", name: "Recent Activity" },
+    { id: "tabContent", name: "Tab Content" },
+  ];
+
+  return widgetDefinitions
+    .filter((widget) => widgetSettings.value[widget.id]?.visible)
+    .sort((a, b) => {
+      return (
+        (widgetSettings.value[a.id]?.order || 99) -
+        (widgetSettings.value[b.id]?.order || 99)
+      );
+    });
+});
 
 // Computed properties
 const currentTabComponent = computed(() => {
