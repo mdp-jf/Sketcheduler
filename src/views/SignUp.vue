@@ -120,11 +120,22 @@ import { ref } from "vue";
 import { supabase } from "../lib/supabase";
 import router from "../router/index";
 import type { AuthError } from "@supabase/supabase-js";
+import { useMaintenanceMode } from "../composables/useMaintenanceMode";
+
+// Inside your setup function:
+const { isInMaintenance } = useMaintenanceMode();
 
 const email = ref("");
 const password = ref("");
 
 const handleSignup = async () => {
+  if (isInMaintenance.value) {
+    alert(
+      "Registration is temporarily disabled while we're in maintenance. Please check back later.",
+    );
+    return;
+  }
+
   try {
     const { error } = await supabase.auth.signUp({
       email: email.value,

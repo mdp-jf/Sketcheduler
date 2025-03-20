@@ -99,3 +99,55 @@ export interface User {
   id: string;
   email: string;
 }
+
+/**
+ * Extended User interface with profile information
+ */
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  avatar_url?: string;
+  bio?: string;
+  website?: string;
+  social_links?: Record<string, string>;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * User statistics
+ */
+export interface UserStats {
+  totalDrawings: number;
+  totalHoursDrawing: number;
+  completedLessons: number;
+  totalLessons: number;
+  lessonCompletionPercentage: number;
+  completedChallenges: number;
+  activeChallengeSummary: Array<{
+    id: number;
+    title: string;
+    current_count: number;
+    target_count: number;
+  }>;
+}
+
+/**
+ * User activity item
+ */
+export interface UserActivity {
+  id: number;
+  user_id: string;
+  activity_type:
+    | "lesson_completed"
+    | "challenge_progress"
+    | "drawing_created"
+    | "exercise_completed"
+    | string;
+  title: string;
+  notes?: string;
+  image_url?: string;
+  related_id?: number;
+  created_at: string;
+}
