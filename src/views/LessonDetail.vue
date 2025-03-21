@@ -88,6 +88,9 @@
           />
         </div>
       </div>
+
+      <!-- Notes and Reflections Section -->
+      <LessonNotes :lesson-id="lessonId" @saved="handleNotesSaved" />
     </div>
   </div>
 </template>
@@ -104,6 +107,7 @@ import ExerciseItem from "../components/ExerciseItem.vue";
 import BaseLoading from "../components/BaseLoading.vue";
 import BaseError from "../components/BaseError.vue";
 import { type Exercise, type Lesson } from "../types/models";
+import LessonNotes from "../components/LessonNotes.vue";
 
 // Define component name
 defineOptions({

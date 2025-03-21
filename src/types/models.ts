@@ -266,3 +266,13 @@ export interface ChallengeSummary {
     completed_at: string;
   };
 }
+
+export interface LessonNote {
+  id?: number;
+  user_id: string;
+  lesson_id: number;
+  notes: string;
+  reflection: string;
+  created_at?: string;
+  updated_at?: string;
+}

@@ -274,7 +274,7 @@ export const useChallengesStore = defineStore("challenges", () => {
         const date = new Date(today);
         date.setMonth(today.getMonth() - i);
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-        
+
         monthsMap.set(monthKey, 0);
       }
 
