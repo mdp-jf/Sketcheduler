@@ -21,7 +21,7 @@ export const useExercisesStore = defineStore("exercises", () => {
   const exerciseStreak = ref({
     current: 0,
     best: 0,
-    lastExerciseDate: null as string | null
+    lastExerciseDate: null as string | null,
   });
   const loading = ref(false);
 
@@ -30,7 +30,10 @@ export const useExercisesStore = defineStore("exercises", () => {
     return [...completedExercises.value]
       .sort((a, b) => {
         if (!a.completed_at || !b.completed_at) return 0;
-        return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
+        return (
+          new Date(b.completed_at).getTime() -
+          new Date(a.completed_at).getTime()
+        );
       })
       .slice(0, 5);
   });
@@ -45,7 +48,9 @@ export const useExercisesStore = defineStore("exercises", () => {
 
   const exerciseCompletionPercentage = computed(() => {
     if (totalExercisesCount.value === 0) return 0;
-    return Math.round((completedExercisesCount.value / totalExercisesCount.value) * 100);
+    return Math.round(
+      (completedExercisesCount.value / totalExercisesCount.value) * 100,
+    );
   });
 
   // Fetch functions
@@ -107,10 +112,12 @@ export const useExercisesStore = defineStore("exercises", () => {
 
       const { data, error } = await supabase
         .from("user_exercise_progress")
-        .select(`
+        .select(
+          `
           *,
           exercises(*)
-        `)
+        `,
+        )
         .eq("user_id", user.id)
         .eq("status", "completed")
         .order("completed_at", { ascending: false });
@@ -118,9 +125,9 @@ export const useExercisesStore = defineStore("exercises", () => {
       if (error) throw error;
 
       // Map data to include exercise title and other details
-      const mappedData = data.map(progress => ({
+      const mappedData = data.map((progress) => ({
         ...progress,
-        title: progress.exercises?.title || "Unknown Exercise"
+        title: progress.exercises?.title || "Unknown Exercise",
       }));
 
       completedExercises.value = mappedData;
@@ -144,8 +151,8 @@ export const useExercisesStore = defineStore("exercises", () => {
       if (error) throw error;
 
       // Extract unique categories
-      const categories = [...new Set(data.map(item => item.category))].filter(
-        category => category !== null && category !== ""
+      const categories = [...new Set(data.map((item) => item.category))].filter(
+        (category) => category !== null && category !== "",
       );
 
       exerciseCategories.value = categories as string[];
@@ -182,20 +189,25 @@ export const useExercisesStore = defineStore("exercises", () => {
       if (completedError) throw completedError;
 
       // Build a set of completed exercise IDs for quick lookup
-      const completedIdSet = new Set(completedIds.map(item => item.exercise_id));
+      const completedIdSet = new Set(
+        completedIds.map((item) => item.exercise_id),
+      );
 
       // Group by category and count totals and completed
-      const categoryCounts: Record<string, { total: number; completed: number }> = {};
+      const categoryCounts: Record<
+        string,
+        { total: number; completed: number }
+      > = {};
 
-      allExercises.forEach(exercise => {
+      allExercises.forEach((exercise) => {
         const category = exercise.category || "Uncategorized";
-        
+
         if (!categoryCounts[category]) {
           categoryCounts[category] = { total: 0, completed: 0 };
         }
-        
+
         categoryCounts[category].total++;
-        
+
         if (completedIdSet.has(exercise.id)) {
           categoryCounts[category].completed++;
         }
@@ -204,7 +216,7 @@ export const useExercisesStore = defineStore("exercises", () => {
       // Convert to the format needed for the component
       const result = Object.entries(categoryCounts).map(([name, counts]) => ({
         name,
-        ...counts
+        ...counts,
       }));
 
       categoryProgress.value = result;
@@ -241,29 +253,32 @@ export const useExercisesStore = defineStore("exercises", () => {
 
       // Process dates to calculate streak
       const dates = data
-        .filter(item => item.completed_at)
-        .map(item => new Date(item.completed_at as string).toISOString().split('T')[0]);
+        .filter((item) => item.completed_at)
+        .map(
+          (item) =>
+            new Date(item.completed_at as string).toISOString().split("T")[0],
+        );
 
       // Get unique dates (in case multiple exercises were completed on the same day)
-      const uniqueDates = [...new Set(dates)].sort((a, b) => 
-        new Date(b).getTime() - new Date(a).getTime()
+      const uniqueDates = [...new Set(dates)].sort(
+        (a, b) => new Date(b).getTime() - new Date(a).getTime(),
       );
 
       // Calculate current streak
       let currentStreak = 1;
       let bestStreak = 1;
-      
+
       // Start from the most recent date
       let currentDate = new Date(uniqueDates[0]);
-      
+
       // Check for consecutive days
       for (let i = 1; i < uniqueDates.length; i++) {
         const prevDate = new Date(uniqueDates[i]);
-        
+
         // Calculate difference in days
         const diffTime = currentDate.getTime() - prevDate.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays === 1) {
           // Consecutive day
           currentStreak++;
@@ -272,19 +287,19 @@ export const useExercisesStore = defineStore("exercises", () => {
           // Streak broken
           currentStreak = 1;
         }
-        
+
         currentDate = prevDate;
       }
 
       // Check if the streak is still active (exercise done today or yesterday)
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       const mostRecentDate = new Date(uniqueDates[0]);
       mostRecentDate.setHours(0, 0, 0, 0);
-      
+
       const daysSinceLastExercise = Math.floor(
-        (today.getTime() - mostRecentDate.getTime()) / (1000 * 60 * 60 * 24)
+        (today.getTime() - mostRecentDate.getTime()) / (1000 * 60 * 60 * 24),
       );
 
       // If it's been more than 1 day since the last exercise, the streak is broken
@@ -295,7 +310,7 @@ export const useExercisesStore = defineStore("exercises", () => {
       exerciseStreak.value = {
         current: currentStreak,
         best: bestStreak,
-        lastExerciseDate: uniqueDates[0]
+        lastExerciseDate: uniqueDates[0],
       };
 
       return { success: true, data: exerciseStreak.value };
@@ -315,9 +330,9 @@ export const useExercisesStore = defineStore("exercises", () => {
         fetchCompletedExercises(),
         fetchExerciseCategories(),
         fetchExerciseCategoryProgress(),
-        calculateExerciseStreak()
+        calculateExerciseStreak(),
       ]);
-      
+
       return { success: true };
     } catch (error) {
       console.error("Error loading exercise tracking data:", error);
@@ -352,7 +367,12 @@ export const useExercisesStore = defineStore("exercises", () => {
     }
   }
 
-  async function submitExercise(exerciseId: number, imageUrl: string, notes: string, selfRating?: number) {
+  async function submitExercise(
+    exerciseId: number,
+    imageUrl: string,
+    notes: string,
+    selfRating?: number,
+  ) {
     loading.value = true;
     try {
       console.log(`Submitting exercise ID: ${exerciseId}`);
@@ -362,13 +382,13 @@ export const useExercisesStore = defineStore("exercises", () => {
         notes,
         selfRating,
       );
-      
+
       // After submitting, refresh the completed exercises list
       await fetchCompletedExercises();
-      
+
       // Recalculate streak
       await calculateExerciseStreak();
-      
+
       return { success: true, data: result };
     } catch (error) {
       console.error("Error submitting exercise:", error);

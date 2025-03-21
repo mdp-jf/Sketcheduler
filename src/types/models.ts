@@ -100,7 +100,6 @@ export interface User {
   email: string;
 }
 
-
 export interface User {
   id: string;
   email: string;
@@ -163,7 +162,7 @@ export interface UserExerciseProgress {
   user_id: string;
   exercise_id: number;
   title?: string; // From joined exercise data
-  status: 'not_started' | 'in_progress' | 'completed';
+  status: "not_started" | "in_progress" | "completed";
   self_rating?: number;
   completed_at?: string;
   warmup_count?: number;
@@ -217,4 +216,53 @@ export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
+}
+
+export interface Challenge {
+  id: number;
+  title: string;
+  description: string;
+  target_count: number;
+  difficulty: string;
+  order_number: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChallengeProgress {
+  id: number;
+  user_id: string;
+  challenge_id: number;
+  current_count: number;
+  status: "not_started" | "in_progress" | "completed";
+  started_at?: string;
+  completed_at?: string;
+  challenges?: Challenge;
+}
+
+export interface ChallengeSubmission {
+  id: number;
+  user_id: string;
+  challenge_id: number;
+  image_url?: string;
+  count: number;
+  notes?: string;
+  created_at: string;
+}
+
+export interface MonthlyCompletion {
+  month: string;
+  count: number;
+}
+
+export interface ChallengeSummary {
+  totalActive: number;
+  totalCompleted: number;
+  totalSubmissions: number;
+  completionRate: number;
+  lastCompletedChallenge?: {
+    id: number;
+    title: string;
+    completed_at: string;
+  };
 }
