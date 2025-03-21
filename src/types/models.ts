@@ -100,9 +100,7 @@ export interface User {
   email: string;
 }
 
-/**
- * Extended User interface with profile information
- */
+
 export interface User {
   id: string;
   email: string;
@@ -115,9 +113,6 @@ export interface User {
   updated_at: string;
 }
 
-/**
- * User statistics
- */
 export interface UserStats {
   totalDrawings: number;
   totalHoursDrawing: number;
@@ -150,4 +145,76 @@ export interface UserActivity {
   image_url?: string;
   related_id?: number;
   created_at: string;
+}
+
+export interface Exercise {
+  id: number;
+  title: string;
+  description: string;
+  order_number: number;
+  lesson_id: number;
+  is_warmup_eligible: boolean;
+  category?: string;
+  created_at: string;
+}
+
+export interface UserExerciseProgress {
+  id: number;
+  user_id: string;
+  exercise_id: number;
+  title?: string; // From joined exercise data
+  status: 'not_started' | 'in_progress' | 'completed';
+  self_rating?: number;
+  completed_at?: string;
+  warmup_count?: number;
+  last_used_as_warmup?: string;
+  exercises?: Exercise; // For joined queries
+}
+
+export interface UserStats {
+  totalDrawings: number;
+  totalHoursDrawing: number;
+  completedLessons: number;
+  totalLessons: number;
+  lessonCompletionPercentage: number;
+  completedChallenges: number;
+  activeChallengeSummary: Array<{
+    id: number;
+    title: string;
+    current_count: number;
+    target_count: number;
+  }>;
+  // Add exercise-specific stats
+  completedExercises?: number;
+  exerciseCompletionPercentage?: number;
+  currentExerciseStreak?: number;
+  bestExerciseStreak?: number;
+}
+
+export interface UserActivity {
+  id: number;
+  user_id: string;
+  activity_type: string;
+  title: string;
+  notes?: string;
+  image_url?: string;
+  created_at: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  avatar_url?: string;
+  bio?: string;
+  website?: string;
+  social_links?: Record<string, string>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
 }

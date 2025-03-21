@@ -58,6 +58,11 @@ const routes: Array<RouteRecordRaw> = [
     name: "maintenance",
     component: () => import("../views/MaintenanceView.vue"),
   },
+  {
+    path: '/exercise-tracking',
+    name: 'ExerciseTracking',
+    component: () => import('../views/ExerciseTrackingView.vue')
+  }
 ];
 
 const router = createRouter({
