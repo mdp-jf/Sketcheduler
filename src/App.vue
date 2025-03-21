@@ -19,6 +19,18 @@
           <router-link to="/profile" class="text-gray-600 hover:text-blue-500">
             Profile
           </router-link>
+          <router-link
+            to="/exercise-tracking"
+            class="text-gray-600 hover:text-blue-500"
+          >
+            Exercise Tracking
+          </router-link>
+          <router-link
+            to="/challenge-tracking"
+            class="text-gray-600 hover:text-blue-500"
+          >
+            Challenge Tracking
+          </router-link>
           <button
             class="text-gray-600 hover:text-red-500"
             @click="handleSignOut"
